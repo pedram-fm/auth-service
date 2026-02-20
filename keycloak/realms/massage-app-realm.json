@@ -1,0 +1,483 @@
+{
+  "realm": "massage-app",
+  "enabled": true,
+  "displayName": "Massage App",
+  "displayNameHtml": "<strong>Massage App</strong>",
+  "loginTheme": "keycloak",
+  "accountTheme": "keycloak.v3",
+  "adminTheme": "keycloak.v2",
+  "emailTheme": "keycloak",
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "registrationEmailAsUsername": false,
+  "rememberMe": true,
+  "verifyEmail": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "permanentLockout": false,
+  "maxFailureWaitSeconds": 900,
+  "minimumQuickLoginWaitSeconds": 60,
+  "waitIncrementSeconds": 60,
+  "quickLoginCheckMilliSeconds": 1000,
+  "maxDeltaTimeSeconds": 43200,
+  "failureFactor": 5,
+  "accessTokenLifespan": 900,
+  "accessTokenLifespanForImplicitFlow": 900,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "offlineSessionIdleTimeout": 2592000,
+  "offlineSessionMaxLifespan": 5184000,
+  "accessCodeLifespan": 60,
+  "accessCodeLifespanUserAction": 300,
+  "accessCodeLifespanLogin": 1800,
+  "actionTokenGeneratedByAdminLifespan": 43200,
+  "actionTokenGeneratedByUserLifespan": 300,
+
+  "passwordPolicy": "length(8) and notUsername and notEmail",
+
+  "roles": {
+    "realm": [
+      {
+        "name": "admin",
+        "description": "Application administrator — full access to all features",
+        "composite": false
+      },
+      {
+        "name": "therapist",
+        "description": "Massage therapist — can manage schedule, sessions, and client info",
+        "composite": false
+      },
+      {
+        "name": "client",
+        "description": "Client — can book sessions, view therapists, manage profile",
+        "composite": false
+      }
+    ],
+    "client": {
+      "massage-web-app": [
+        {
+          "name": "manage_users",
+          "description": "Can manage all users (admin)"
+        },
+        {
+          "name": "manage_roles",
+          "description": "Can manage roles and permissions (admin)"
+        },
+        {
+          "name": "view_all_sessions",
+          "description": "Can view all sessions across the platform (admin)"
+        },
+        {
+          "name": "manage_settings",
+          "description": "Can manage application settings (admin)"
+        },
+        {
+          "name": "view_reports",
+          "description": "Can view reports and analytics (admin)"
+        },
+        {
+          "name": "set_availability",
+          "description": "Can set own schedule availability (therapist)"
+        },
+        {
+          "name": "view_own_sessions",
+          "description": "Can view own sessions (therapist)"
+        },
+        {
+          "name": "manage_session_plans",
+          "description": "Can manage session plans and treatments (therapist)"
+        },
+        {
+          "name": "update_session_status",
+          "description": "Can update session status (therapist)"
+        },
+        {
+          "name": "view_client_info",
+          "description": "Can view client information and intake forms (therapist)"
+        },
+        {
+          "name": "manage_own_profile",
+          "description": "Can manage own profile (shared)"
+        },
+        {
+          "name": "book_session",
+          "description": "Can book massage sessions (client)"
+        },
+        {
+          "name": "view_my_sessions",
+          "description": "Can view own booked sessions (client)"
+        },
+        {
+          "name": "cancel_session",
+          "description": "Can cancel own sessions (client)"
+        },
+        {
+          "name": "view_therapists",
+          "description": "Can view therapist profiles and availability (client)"
+        }
+      ]
+    }
+  },
+
+  "defaultRoles": ["client"],
+
+  "groups": [
+    {
+      "name": "admins",
+      "path": "/admins",
+      "realmRoles": ["admin"],
+      "clientRoles": {
+        "massage-web-app": [
+          "manage_users",
+          "manage_roles",
+          "view_all_sessions",
+          "manage_settings",
+          "view_reports",
+          "set_availability",
+          "view_own_sessions",
+          "manage_session_plans",
+          "update_session_status",
+          "view_client_info",
+          "manage_own_profile",
+          "book_session",
+          "view_my_sessions",
+          "cancel_session",
+          "view_therapists"
+        ]
+      }
+    },
+    {
+      "name": "therapists",
+      "path": "/therapists",
+      "realmRoles": ["therapist"],
+      "clientRoles": {
+        "massage-web-app": [
+          "set_availability",
+          "view_own_sessions",
+          "manage_session_plans",
+          "update_session_status",
+          "view_client_info",
+          "manage_own_profile"
+        ]
+      }
+    },
+    {
+      "name": "clients",
+      "path": "/clients",
+      "realmRoles": ["client"],
+      "clientRoles": {
+        "massage-web-app": [
+          "book_session",
+          "view_my_sessions",
+          "cancel_session",
+          "view_therapists",
+          "manage_own_profile"
+        ]
+      }
+    }
+  ],
+
+  "clients": [
+    {
+      "clientId": "massage-web-app",
+      "name": "Massage Web Application",
+      "description": "Main web app — handles user login via Direct Access Grant, also supports Authorization Code + PKCE",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "CHANGE_ME_massage_web_app_secret",
+      "redirectUris": [
+        "http://localhost:3000/*",
+        "https://massage-app.com/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3000",
+        "https://massage-app.com"
+      ],
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "frontchannelLogout": true,
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:3000/*##https://massage-app.com/*",
+        "backchannel.logout.session.required": "true",
+        "backchannel.logout.revoke.offline.tokens": "true",
+        "login_theme": "keycloak",
+        "display.on.consent.screen": "false",
+        "oauth2.device.authorization.grant.enabled": "false",
+        "oidc.ciba.grant.enabled": "false",
+        "use.refresh.tokens": "true",
+        "client.session.idle.timeout": "1800",
+        "client.session.max.lifespan": "36000"
+      },
+      "defaultClientScopes": [
+        "web-origins",
+        "profile",
+        "roles",
+        "email",
+        "acr",
+        "basic"
+      ],
+      "optionalClientScopes": [
+        "phone",
+        "address",
+        "offline_access",
+        "microprofile-jwt"
+      ],
+      "protocolMappers": [
+        {
+          "name": "phone_number",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "phone_number",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "phone_number",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "name": "phone_verified",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "phone_verified",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "phone_verified",
+            "jsonType.label": "boolean"
+          }
+        },
+        {
+          "name": "gender",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "gender",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "gender",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "name": "avatar_url",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "avatar_url",
+            "id.token.claim": "false",
+            "access.token.claim": "false",
+            "claim.name": "avatar_url",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "name": "realm-roles-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "multivalued": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "realm_access.roles",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "name": "client-roles-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-client-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "multivalued": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "resource_access.${client_id}.roles",
+            "jsonType.label": "String",
+            "usermodel.clientRoleMapping.clientId": "massage-web-app"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "massage-api-service",
+      "name": "Massage API Service",
+      "description": "Backend Laravel service — uses Client Credentials for Keycloak Admin API access",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "CHANGE_ME_massage_api_service_secret",
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "defaultClientScopes": [
+        "web-origins",
+        "profile",
+        "roles",
+        "email",
+        "basic"
+      ],
+      "attributes": {
+        "use.refresh.tokens": "false"
+      }
+    }
+  ],
+
+  "users": [
+    {
+      "username": "admin@massage-app.test",
+      "email": "admin@massage-app.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Admin",
+      "lastName": "User",
+      "attributes": {
+        "phone_number": ["09111111111"],
+        "phone_verified": ["true"],
+        "gender": ["male"]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["admin"],
+      "groups": ["/admins"]
+    },
+    {
+      "username": "therapist.male@massage-app.test",
+      "email": "therapist.male@massage-app.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Ali",
+      "lastName": "Therapist",
+      "attributes": {
+        "phone_number": ["09122222222"],
+        "phone_verified": ["true"],
+        "gender": ["male"]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["therapist"],
+      "groups": ["/therapists"]
+    },
+    {
+      "username": "therapist.female@massage-app.test",
+      "email": "therapist.female@massage-app.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Sara",
+      "lastName": "Therapist",
+      "attributes": {
+        "phone_number": ["09133333333"],
+        "phone_verified": ["true"],
+        "gender": ["female"]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["therapist"],
+      "groups": ["/therapists"]
+    },
+    {
+      "username": "client@massage-app.test",
+      "email": "client@massage-app.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Reza",
+      "lastName": "Client",
+      "attributes": {
+        "phone_number": ["09144444444"],
+        "phone_verified": ["true"],
+        "gender": ["male"]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["client"],
+      "groups": ["/clients"]
+    }
+  ],
+
+  "scopeMappings": [
+    {
+      "client": "massage-web-app",
+      "roles": ["admin", "therapist", "client"]
+    }
+  ],
+
+  "clientScopeMappings": {
+    "massage-web-app": [
+      {
+        "client": "massage-web-app",
+        "roles": [
+          "manage_users",
+          "manage_roles",
+          "view_all_sessions",
+          "manage_settings",
+          "view_reports",
+          "set_availability",
+          "view_own_sessions",
+          "manage_session_plans",
+          "update_session_status",
+          "view_client_info",
+          "manage_own_profile",
+          "book_session",
+          "view_my_sessions",
+          "cancel_session",
+          "view_therapists"
+        ]
+      }
+    ]
+  },
+
+  "browserSecurityHeaders": {
+    "contentSecurityPolicy": "frame-src 'self'; frame-ancestors 'self'; object-src 'none';",
+    "xContentTypeOptions": "nosniff",
+    "xFrameOptions": "SAMEORIGIN",
+    "xRobotsTag": "none",
+    "xXSSProtection": "1; mode=block",
+    "strictTransportSecurity": "max-age=31536000; includeSubDomains"
+  },
+
+  "smtpServer": {},
+  "internationalizationEnabled": false,
+  "supportedLocales": [],
+  "defaultLocale": "en"
+}
