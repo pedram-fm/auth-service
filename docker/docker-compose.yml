@@ -1,0 +1,107 @@
+# ===========================================
+# Auth Service - SSO Server (Keycloak)
+# ===========================================
+# Usage:
+#   Development: docker compose up -d
+#   Production:  docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+services:
+
+  # --- PostgreSQL Database ---
+  postgres:
+    image: docker.arvancloud.ir/postgres:16-alpine
+    container_name: auth_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - auth_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # --- Keycloak Auth Server ---
+  keycloak:
+    image: docker.arvancloud.ir/keycloak/keycloak:26.1.0
+    container_name: auth_keycloak
+    # Development mode — uses start-dev
+    # For production, use docker-compose.prod.yml override
+    command: start-dev --import-realm
+    restart: unless-stopped
+    environment:
+      # Admin
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      # Database
+      KC_DB: ${KC_DB}
+      KC_DB_URL_HOST: ${KC_DB_URL_HOST}
+      KC_DB_URL_DATABASE: ${KC_DB_URL_DATABASE}
+      KC_DB_USERNAME: ${KC_DB_USERNAME}
+      KC_DB_PASSWORD: ${KC_DB_PASSWORD}
+      # Server
+      KC_HTTP_PORT: ${KC_HTTP_PORT:-8080}
+      KC_PROXY_HEADERS: ${KC_PROXY_HEADERS:-xforwarded}
+      KC_HOSTNAME: ${KC_HOSTNAME:-auth.localhost}
+      KC_HOSTNAME_STRICT: "false"
+      KC_HTTP_ENABLED: "true"
+      # Features
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+      # Workaround for Keycloak 26.x "Session not bound to a realm" bug on --import-realm
+      # (triggered by InfinispanIdentityProviderStorageProvider during service account setup)
+      KC_TRANSACTION_XA_ENABLED: "false"
+      KC_SPI_USER_CACHE_DEFAULT_ENABLED: "false"
+    ports:
+      - "${KC_HTTP_PORT:-8080}:8080"
+    volumes:
+      - ../keycloak/realms:/opt/keycloak/data/import:ro
+      - ../keycloak/themes:/opt/keycloak/themes:ro
+      - ../keycloak/providers:/opt/keycloak/providers:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - auth_network
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/9000 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200'"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # --- Nginx Reverse Proxy ---
+  nginx:
+    image: docker.arvancloud.ir/nginx:1.25-alpine
+    container_name: auth_nginx
+    restart: unless-stopped
+    ports:
+      - "${NGINX_HTTP_PORT:-80}:80"
+      - "${NGINX_HTTPS_PORT:-443}:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    networks:
+      - auth_network
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  auth_network:
+    driver: bridge

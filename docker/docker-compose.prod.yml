@@ -1,0 +1,22 @@
+version: "3.9"
+
+# ===========================================
+# Production Overrides
+# ===========================================
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+services:
+
+  keycloak:
+    command: start --optimized --import-realm
+    environment:
+      KC_HOSTNAME_STRICT: "true"
+      KC_HTTP_ENABLED: "false"
+      KC_PROXY_HEADERS: xforwarded
+    restart: always
+
+  postgres:
+    restart: always
+
+  nginx:
+    restart: always

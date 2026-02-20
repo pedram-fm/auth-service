@@ -1,0 +1,23 @@
+# Backups
+backups/
+
+# Environment (contains secrets)
+docker/.env
+
+# SSL Certificates
+docker/ssl/*.pem
+docker/ssl/*.key
+docker/ssl/*.crt
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
