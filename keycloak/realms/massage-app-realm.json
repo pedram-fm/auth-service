@@ -346,6 +346,20 @@
 
   "users": [
     {
+      "username": "service-account-massage-api-service",
+      "enabled": true,
+      "serviceAccountClientId": "massage-api-service",
+      "clientRoles": {
+        "realm-management": [
+          "manage-users",
+          "view-users",
+          "query-users",
+          "query-groups",
+          "view-clients"
+        ]
+      }
+    },
+    {
       "username": "admin@massage-app.test",
       "email": "admin@massage-app.test",
       "emailVerified": true,
@@ -360,7 +374,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "password",
+          "value": "Admin123!",
           "temporary": false
         }
       ],
@@ -382,7 +396,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "password",
+          "value": "Test1234!",
           "temporary": false
         }
       ],
@@ -404,7 +418,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "password",
+          "value": "Test1234!",
           "temporary": false
         }
       ],
@@ -426,7 +440,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "password",
+          "value": "Test1234!",
           "temporary": false
         }
       ],
